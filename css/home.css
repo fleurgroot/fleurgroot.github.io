@@ -7,9 +7,9 @@ html, body {
 .hero {
   background-image: url('../Images_Main/Mobile_Landing_Page.gif');
   background-repeat: no-repeat; 
-  background-size: 100% auto;
-  background-position: 0 35px;
-  max-width: 450px; 
+  background-size: 90% auto;
+  background-position: 15px 45px;
+  max-width: 375px; 
   height: auto;
   position: relative;
 }
