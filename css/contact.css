@@ -28,7 +28,6 @@ html, body {
 
 form {
   position: relative;
-  border-radius: 1rem;
   padding: 25px;  
   background-color: #feb9af;
   width: min(70vw, 550px);
@@ -48,6 +47,7 @@ form > label {
 }
 button[type="button"],
 button[type="submit"] {
+  font-size: 1rem;
   font-weight: 700;
   padding: 6px 11px 6px 11px;
   border-radius: 1rem;
@@ -138,20 +138,19 @@ textarea::placeholder {
   left: 0;
   width: 5rem;
   height: 5rem;
-  background-color: var(--color-white);
+  background-color: #fff961;
   border-radius: 50%;
   transform: translate(-45%, -45%) rotate(-20deg);
   z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ff78ab;
+  color: var(--main-black);
   box-shadow:.07rem .12rem 0 var(--main-black);
 }
 .sticker:hover {
   background-color: #ff78ab;
   transform: translate(-45%, -45%) rotate(0deg);
-  color: var(--color-white)
 }
 
 .nav-button--menu {
@@ -160,20 +159,25 @@ textarea::placeholder {
   border-bottom: 1px var(--color-white) solid;
   border-right: none;
 }
-
-@media (min-width: 950px) {
+/* ----------------------------------- tablet – min-width 500px --------------------------------------- */
+@media (min-width: 500px) {
   .hero {
     background-image: url('../Images_Main/Contact_me.gif');
-    transform: rotate(-1deg);
-    background-repeat: repeat; 
-    background-size: 57% auto; 
-    background-position: -10px -10px;
-    min-height: 100vh;
-    width: 100%;
-    position: relative;
+    background-position: center 10px;
+    background-repeat: repeat-y; 
+    background-size: contain;
+    background-size: 90% auto;
+    max-width: 949px;
+  
   }
-  .formWrapper {
-    transform: rotate(1deg);
+}
+/* --------------------------------- desktop – min-width 950px ----------------------------------------- */
+@media (min-width: 950px) {
+  .hero {
+    background-position: 30px 30px;
+    max-width: 1350px;
+    background-repeat: no-repeat; 
+  
   }
   
 }
