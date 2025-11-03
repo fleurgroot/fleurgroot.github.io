@@ -58,7 +58,7 @@ h2, .boldText {
 p {
     font-weight: 300;
     font-size: .9rem;
-    line-height: 1.1rem;
+    line-height: 1.25rem;
     margin-bottom: 0;
 }
 .boldTextP {
@@ -74,7 +74,7 @@ p {
     display: none;
 }
 .sectionText {
-    padding-top: 2rem;
+    padding-top: 3.3rem;
 }
 
 main {
