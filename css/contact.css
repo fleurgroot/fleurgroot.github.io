@@ -135,7 +135,7 @@ textarea::placeholder {
   font-weight: bold;
   position: absolute;
   top: 0;
-  left: 0;
+  left: 50%;
   width: 5rem;
   height: 5rem;
   background-color: #fff961;
@@ -169,6 +169,9 @@ textarea::placeholder {
     background-size: 90% auto;
     max-width: 949px;
   
+  }
+  .sticker {
+    left: 0;
   }
 }
 /* --------------------------------- desktop – min-width 950px ----------------------------------------- */

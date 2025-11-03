@@ -275,6 +275,9 @@ button {
 /* ----------------------------------- tablet – min-width 500px --------------------------------------- */
 @media (min-width: 500px) {
 
+    p {
+        line-height: 1.2rem;
+    }
     hr {
         grid-column: 1 / -1;
     }
