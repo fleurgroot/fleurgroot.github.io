@@ -53,32 +53,32 @@ button[type="submit"] {
   border-radius: 1rem;
 }
 button[type="button"] {
-  border: 1.5px solid #c74151;
-  color: #c74151;
-  background-color: var(--color-white);
+  border: 1.5px solid var(--main-black);
+  color: var(--main-black);
+  background-color: #feb9af;
 }
 
 /* cancel button */
 button[type="button"]:hover {
   font-style: italic;
   box-shadow:
-  .19rem .19rem 0 var(--color-white),
-  .35rem .35rem 0 #c74151;
+  .19rem .19rem 0 #feb9af,
+  .35rem .35rem 0 var(--main-black);
 }
-
+/* submit button */
 button[type="submit"] {
-  border: 1.5px solid var(--main-blue);
-  color: var(--color-white);
-  background-color: var(--main-blue);
+  border: 1.5px solid #fff961;
+  color: var(--main-black);
+  background-color: #fff961;
 }
 
 button[type="submit"]:hover {
   font-style: italic;
-  color: var(--color-white);
-  background-color: var(--main-blue) ;
+  color: var(--main-black);
+  background-color: #fff961;
   box-shadow:
-  .19rem .19rem 0 var(--color-white),
-  .35rem .35rem 0 var(--main-blue);
+  .19rem .19rem 0  #feb9af,
+  .35rem .35rem 0 #fff961;
 }
 
 input, textarea, select {

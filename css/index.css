@@ -31,8 +31,9 @@ html, body {
 /* ----------------------------------- tablet – min-width 500px --------------------------------------- */
 @media (min-width: 500px) {
   .hero {
-    background-position: 0 0;
-    max-width: 700px;
+    background-image: url('../Images_Main/Landing_page_desktop.gif');
+    background-position: 45px 45px;
+    max-width: 900px;
   }
 
 }
@@ -41,7 +42,6 @@ html, body {
 @media (min-width: 950px) {
  
 .hero {
-  background-image: url('../Images_Main/Landing_page_desktop.gif');
   max-width: 1350px;
 }
 }
