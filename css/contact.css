@@ -18,6 +18,13 @@ html, body {
   z-index: 1;
 }
 
+#contact input,
+#contact textarea {
+    border-radius: 0;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
 .formWrapper {
   display: flex;
   justify-content: center;
