@@ -214,8 +214,6 @@ nav a.current {
     border-top-left-radius: 1rem;
     border-bottom-left-radius: 1rem;
     right: 0;
-    /* right: 0; */
-    /* box-shadow: none; */
 }
 .nav-button--menu:hover {
     box-shadow:
@@ -228,11 +226,8 @@ nav a.current {
     border-top-left-radius: 1rem;
     border-bottom-left-radius: 1rem;
     right: 0;
-    /* position: fixed; */
     bottom: 3rem;
-    /* box-shadow: none;  */
 }
-
 
 .nav-button--back-to-top:hover {
     box-shadow:

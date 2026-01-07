@@ -14,6 +14,12 @@
     width: 100%;
     height: auto;
   }
+
+  .imageGridB {
+    display: grid;
+    gap: var(--gap-sml);
+    grid-column: span 1;
+  }
 /* -------------------------------- min-width 500px ------------------------------------------ */
 @media (min-width: 500px) {
     .one, .two, .three, .four, .six, .seven, .eight,
@@ -41,6 +47,14 @@
       .imageGrid img {
         grid-column: span 4;
       }
+    
+      .imageGridB {
+        grid-column: span 5;
+        grid-template-columns: repeat(5, 1fr);
+      }
+      .imageGridB img {
+        grid-column: span 5;
+      }
 }
 /* -------------------------------- min-width 950px ------------------------------------------ */
 @media (min-width:950px) {
@@ -54,4 +68,12 @@
     width: 100%;
     height: auto;
     }
+
+    .imageGridB {
+        grid-column: span 4;
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .imageGridB img {
+        grid-column: span 4;
+      }
 }
