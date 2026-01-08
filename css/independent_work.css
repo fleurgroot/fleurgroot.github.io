@@ -20,6 +20,15 @@
     gap: var(--gap-sml);
     grid-column: span 1;
   }
+  .imageGridB--mobileRow {
+    grid-template-columns: 1fr 1fr;
+    grid-column: span 2;
+  }
+  /* .imageGridB--mobileRow {
+    display: grid;
+    gap: var(--gap-sml);
+    
+  } */
 /* -------------------------------- min-width 500px ------------------------------------------ */
 @media (min-width: 500px) {
     .one, .two, .three, .four, .six, .seven, .eight,
