@@ -181,8 +181,8 @@ textarea::placeholder {
     left: 0;
   }
 }
-/* --------------------------------- desktop – min-width 950px ----------------------------------------- */
-@media (min-width: 950px) {
+/* --------------------------------- desktop – min-width 992px ----------------------------------------- */
+@media (min-width: 992px) {
   .hero {
     background-position: 30px 30px;
     max-width: 1350px;

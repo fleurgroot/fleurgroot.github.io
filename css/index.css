@@ -50,7 +50,6 @@ html, body {
   z-index: -1;
 }
 
-
 /* ----------------------------------- tablet – min-width 500px --------------------------------------- */
 @media (min-width: 500px) {
   .hero {
@@ -97,8 +96,8 @@ html, body {
 }
 }
 
-/* --------------------------------- desktop – min-width 950px ----------------------------------------- */
-@media (min-width: 950px) {
+/* --------------------------------- desktop – min-width 992px ----------------------------------------- */
+@media (min-width: 992px) {
  
 .hero {
   background-position: 15px 15px;

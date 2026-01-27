@@ -104,7 +104,7 @@ img {
     gap: var(--gap-sml);
     align-items: start;
 }
-/* ========== Nav base styles ========== */
+/* ===================================== Nav base styles ==================================== */
 nav {
     font-size: var(--font-size-large);
     font-weight: 700;
@@ -164,6 +164,56 @@ nav a.current {
     text-underline-offset: 5px;
 }
 
+.nav-label {
+  display: inline-block;
+  width: 12ch; /* adjust to fit longest sentence */
+  white-space: nowrap; /* prevents line breaks if the nav gets tight */
+  text-align: center;
+}
+#rotating-word {
+  display: inline-block;      /* allows consistent spacing for the word */
+  width: 4ch;                 /* reserve space for the longest word */
+  text-align: center;         /* keeps the word centered in its own space */
+  color: inherit;  
+}
+
+/* Common sticker styles */
+.nav-sticker-desktop,
+.nav-sticker-mobile {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background-color: #fff961;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: .07rem .12rem 0 var(--main-black);
+}
+
+.nav-sticker-desktop img,
+.nav-sticker-mobile img {
+    width: 1.6rem;
+    height: auto;
+}
+.nav-sticker-desktop {
+    display: none; /* hide desktop sticker in mobile version */
+}
+
+/* hide mobile sticker by default because it should only show in pop up menu*/
+.nav-sticker-mobile {
+    display: none;
+}
+
+/* show only when menu is open */
+#nav-checkbox:checked ~ nav .nav-sticker-mobile {
+    display: flex;
+    position: absolute;       /* relative to nav */
+    bottom: 2rem;          /* overlap menu */
+    right: 1rem;                /* center horizontally */
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
 /* ============ Nav Toggle Controls ============ */
 #nav-checkbox {
     position: fixed;
@@ -193,7 +243,6 @@ nav a.current {
 #nav-checkbox:checked ~ .overlay {
     display: block;
 }
-
 /* ========== Nav buttons ========== */
 
 .nav-button {
@@ -267,7 +316,7 @@ button {
     vertical-align: middle;
 }
 
-/* ----------------------------------- tablet – min-width 500px --------------------------------------- */
+/* ====================== tablet – min-width 500px =========================== */
 @media (min-width: 500px) {
 
     p {
@@ -330,8 +379,8 @@ button {
     }
     
 }
-/* --------------------------------- desktop – min-width 950px ----------------------------------------- */
-@media (min-width: 950px) {
+/* ====================== desktop – min-width 992px ================================ */
+@media (min-width: 992px) {
 
     hr {
         grid-column: 2 / -1;
@@ -451,6 +500,22 @@ button {
     .nav-button--back-to-top, .nav-button--back {
         bottom: 50%;
     }
+    .nav-sticker-desktop {
+        position: fixed;
+        bottom: 2rem;  /* above fixed bottom nav */
+        right: 1.5rem;
+        z-index: 5;
+        display: flex;
+    }
+    .nav-sticker-desktop:hover {
+        background-color: #ff78ab;
+        transform: rotate(15deg);
+    }
+    /* Hide mobile sticker on desktop */
+    .nav-sticker-mobile {
+        display: none;
+    }
+
 
     main {
         max-width: 1200px;

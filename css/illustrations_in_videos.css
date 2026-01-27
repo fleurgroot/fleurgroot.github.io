@@ -40,7 +40,7 @@ iframe {
 .customPlayButton:hover {
 outline: 1.5px solid var(--main-blue);
 }
-
+/* ================================= Tablet min width 500px =============================== */
 @media (min-width: 500px) {
     
     .videoOverlay, .videoContainer {

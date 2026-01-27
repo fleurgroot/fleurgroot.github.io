@@ -1,3 +1,5 @@
+console.log("JS file loaded");
+
 // js that puts an underline under the name of the page the user is on
 
 window.addEventListener("DOMContentLoaded", function () {
@@ -11,31 +13,31 @@ window.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-// script that activates the play button of a video which is under an overlay
 
-  document.querySelectorAll('.videoContainer').forEach(wrapper => {
-    const overlay = wrapper.querySelector('.videoOverlay');
-    const iframe = wrapper.querySelector('iframe');
+// Script for one word changing every second in a nav li
+const wordSpan = document.getElementById("rotating-word");
+
+if (wordSpan) {
+  const words = [
+    { text: "cool", color: "#b3ebf2" },
+    { text: "fun", color: "#f64a8a" },
+    { text: "nice", color: "#ffff31" }
+  ];
   
-    overlay.addEventListener('click', () => {
-      // Add autoplay to iframe URL
-      const src = iframe.src;
-      if (!src.includes('autoplay=1')) {
-        iframe.src += (src.includes('?') ? '&' : '?') + 'autoplay=1';
-      }
-  
-      // Hide the overlay
-      overlay.style.display = 'none';
-    });
-  })
+  let currentIndex = 0;
 
-// script that makes image larger
+  function rotateWord() {
+    wordSpan.textContent = words[currentIndex].text;
+    wordSpan.style.color = words[currentIndex].color;
+    
+    currentIndex++;
+    if (currentIndex === words.length) currentIndex = 0;
+  }
 
-const wrapper = document.querySelector('.cvWrapper');
-const img = document.querySelector('.zoomableCV');
+  rotateWord(); // <-- immediately set the first word
+  setInterval(rotateWord, 700);
+}
 
-img.addEventListener('click', () => {
-  wrapper.classList.toggle('zoomed');
-});
+ /* changes word every . 7seconds */
 
 

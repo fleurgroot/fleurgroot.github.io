@@ -24,9 +24,9 @@
     cursor: zoom-out;
   }
   
-/* ----------------------------------------- Desktop min-width 950px ----------------------------------------- */
+/* ----------------------------------------- Desktop min-width 992px ----------------------------------------- */
   
-  @media (min-width: 950px) {
+  @media (min-width: 992px) {
     .zoom-wrapper.zoomed {
       margin-top: 6rem;
       margin-left: 2rem;
