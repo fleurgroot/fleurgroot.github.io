@@ -84,6 +84,8 @@ main {
     max-width: 1200px;
     margin: auto;
     padding: 1rem;
+    /* outline: 2px solid red; */
+
 }
 
 .grid {
@@ -208,8 +210,8 @@ nav a.current {
 #nav-checkbox:checked ~ nav .nav-sticker-mobile {
     display: flex;
     position: absolute;       /* relative to nav */
-    bottom: 2rem;          /* overlap menu */
-    right: 1rem;                /* center horizontally */
+    bottom: 1.2rem;          /* overlap menu */
+    right: -.7rem;                /* center horizontally */
     transform: translateX(-50%);
     z-index: 10;
 }
@@ -503,7 +505,7 @@ button {
     .nav-sticker-desktop {
         position: fixed;
         bottom: 2rem;  /* above fixed bottom nav */
-        right: 1.5rem;
+        right: 3rem;
         z-index: 5;
         display: flex;
     }
