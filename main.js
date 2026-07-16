@@ -40,4 +40,16 @@ if (wordSpan) {
 
  /* changes word every . 7seconds */
 
+ // Script for back to top button to appear after scrolling takes place
 
+ const backToTopButton = document.querySelector('.nav-button--back-to-top');
+
+ if (backToTopButton) {
+   window.addEventListener('scroll', () => {
+     if (window.scrollY > 300) {
+       backToTopButton.classList.add('is-visible');
+     } else {
+       backToTopButton.classList.remove('is-visible');
+     }
+   });
+ }
