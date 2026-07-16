@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PDF Viewer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: sans-serif;
+    }
+
+    #canvas-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    canvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      margin-top: 8px;
+    }
+
+    .btn {
+      background: #3554a1;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 7px 18px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.15s;
+    }
+    .btn:hover { background: #243a75; }
+    .btn:disabled { background: #c0c8dc; cursor: default; }
+
+    .page-info {
+      font-size: 13px;
+      color: #555;
+    }
+
+    .zoom-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .zoom-btn {
+      background: #f0f2f8;
+      color: #3554a1;
+      border: 1.5px solid #c5cfe0;
+      border-radius: 5px;
+      width: 30px;
+      height: 30px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: 700;
+      line-height: 1;
+      transition: background 0.15s;
+    }
+    .zoom-btn:hover { background: #dde3f5; }
+    .zoom-label { font-size: 12px; color: #888; min-width: 36px; text-align: center; }
+
+    #upload-prompt {
+      padding: 40px;
+      text-align: center;
+      color: #888;
+      font-size: 14px;
+    }
+    label.load-btn {
+      display: inline-block;
+      background: #3554a1;
+      color: white;
+      border-radius: 6px;
+      padding: 8px 20px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    #file-input { display: none; }
+  </style>
+</head>
+<body>
+
+<div id="upload-prompt">
+  <label class="load-btn" for="file-input">Open PDF</label><br>
+  <input type="file" id="file-input" accept=".pdf" />
+  or drag and drop a PDF anywhere on the page
+</div>
+
+<div id="canvas-container" style="display:none;">
+  <canvas id="pdf-canvas"></canvas>
+</div>
+
+<div class="controls" id="controls" style="display:none;">
+  <button class="btn" id="prev-btn">← Prev</button>
+  <span class="page-info"><span id="cur-page">1</span> / <span id="total-pages">—</span></span>
+  <button class="btn" id="next-btn">Next →</button>
+  <div class="zoom-group">
+    <button class="zoom-btn" id="zoom-out">−</button>
+    <span class="zoom-label" id="zoom-label">100%</span>
+    <button class="zoom-btn" id="zoom-in">+</button>
+  </div>
+</div>
+
+<script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+  let pdfDoc = null;
+  let currentPage = 1;
+  let scale = 1.4;
+  let rendering = false;
+
+  const canvas    = document.getElementById('pdf-canvas');
+  const ctx       = canvas.getContext('2d');
+  const curPageEl = document.getElementById('cur-page');
+  const totalEl   = document.getElementById('total-pages');
+  const zoomLabel = document.getElementById('zoom-label');
+  const prevBtn   = document.getElementById('prev-btn');
+  const nextBtn   = document.getElementById('next-btn');
+
+  async function renderPage(num) {
+    if (rendering) return;
+    rendering = true;
+    const page = await pdfDoc.getPage(num);
+    const vp = page.getViewport({ scale });
+    canvas.width  = vp.width;
+    canvas.height = vp.height;
+    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+    rendering = false;
+    curPageEl.textContent = num;
+    prevBtn.disabled = num <= 1;
+    nextBtn.disabled = num >= pdfDoc.numPages;
+    zoomLabel.textContent = Math.round(scale * 100) + '%';
+  }
+
+  async function loadPDF(data) {
+    pdfDoc = await pdfjsLib.getDocument({ data }).promise;
+    totalEl.textContent = pdfDoc.numPages;
+    document.getElementById('upload-prompt').style.display = 'none';
+    document.getElementById('canvas-container').style.display = 'flex';
+    document.getElementById('controls').style.display = 'flex';
+    currentPage = 1;
+
+    // Auto-fit scale to container width
+    const page = await pdfDoc.getPage(1);
+    const vp = page.getViewport({ scale: 1 });
+    scale = Math.min((document.body.clientWidth - 40) / vp.width, 2.0);
+
+    renderPage(currentPage);
+  }
+
+  prevBtn.addEventListener('click', () => { if (currentPage > 1) renderPage(--currentPage); });
+  nextBtn.addEventListener('click', () => { if (currentPage < pdfDoc.numPages) renderPage(++currentPage); });
+
+  document.getElementById('zoom-in').addEventListener('click', () => {
+    scale = Math.min(scale + 0.2, 3.0);
+    renderPage(currentPage);
+  });
+  document.getElementById('zoom-out').addEventListener('click', () => {
+    scale = Math.max(scale - 0.2, 0.4);
+    renderPage(currentPage);
+  });
+
+  document.addEventListener('keydown', e => {
+    if (!pdfDoc) return;
+    if (e.key === 'ArrowRight') nextBtn.click();
+    if (e.key === 'ArrowLeft')  prevBtn.click();
+  });
+
+  document.getElementById('file-input').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => loadPDF(new Uint8Array(ev.target.result));
+    reader.readAsArrayBuffer(file);
+  });
+
+  document.body.addEventListener('dragover', e => e.preventDefault());
+  document.body.addEventListener('drop', e => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file?.type === 'application/pdf') {
+      const reader = new FileReader();
+      reader.onload = ev => loadPDF(new Uint8Array(ev.target.result));
+      reader.readAsArrayBuffer(file);
+    }
+  });
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>branding</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,200..800;1,200..800&family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/illustrations_in_videos.css">
+    <link rel="stylesheet" href="css/global.css">
+</head>
+<body>
+    <input type="checkbox" id="nav-checkbox">
+    <label for="nav-checkbox" class="nav-button nav-button--menu" role="button" style="z-index: 3;">
+        <span class="long-dash"></span>menu<span class="long-dash"></span>
+    </label>
+    <label for="nav-checkbox" class="overlay"></label>
+    
+    <nav>
+        <label for="nav-checkbox" class="close-button">
+            <span class="nav-icon-text">
+            <img class="icon" src="icons/svg/close_cross_white.svg" alt="close"></span>
+        </label>
+        <ul>
+            <li><a href="index.html"><span class="nav-icon-text">
+                <img class="icon" src="icons/svg/horizontal_line_bottom_blue.svg">home</span></a>
+            </li>
+            <li><a href="about.html"><span class="nav-icon-text">
+                <img class="icon" src="icons/svg/horizontal_line_top_blue.svg">about</span></a>
+            </li>
+            <li><a href="print+digital.html"><span class="nav-icon-text">
+                <img class="icon" src="icons/svg/diagonal_line_left_blue.svg">print | digital</span></a>
+            </li>
+            <li><a href="illustrations_in_videos.html"><span class="nav-icon-text">
+                    <img class="icon" src="icons/svg/diagonal_line_right_blue.svg">illustrations in videos</span></a>
+            </li>
+            <li><a href="cards+prints.html"><span class="nav-icon-text">
+                <img class="icon" src="icons/svg/diagonal_line_left_blue.svg">cards + prints</span></a>
+            </li>
+            <li><a href="independent_work.html"><span class="nav-icon-text">
+                    <img class="icon" src="icons/svg/vertical_line_middle_blue.svg">independent work</span></a>
+            </li>
+            <li><a href="contact.html"><span class="nav-icon-text">
+                <img class="icon" src="icons/svg/horizontal_line_bottom_blue.svg">contact</span></a>
+            </li>
+        </ul>
+        <!-- Mobile sticker outside ul, inside nav -->
+        <a href="https://www.instagram.com/fleur_groot_illustration/" target="_blank"
+        class="nav-sticker-mobile">
+          <img src="icons/svg/instagram.svg" alt="Instagram">
+        </a>
+    </nav>
+    <!-- Desktop sticker floating above nav -->
+    <a href="https://www.instagram.com/fleur_groot_illustration/" target="_blank"
+    class="nav-sticker-desktop">
+        <img src="icons/svg/instagram.svg" alt="Instagram">
+    </a>
+    <main class="grid">
+        <img class="left" src="Images_print_|_digital_JPGs/Fleur_Groot.jpg" alt="Title of the page in a hand drawn 3D font saying 'Fleur Groot' the 'Groot' is upside down underneath 'Fleur'">
+        <img class="right" src="Images_Main/Cool_Fun_Nice_w_colour.gif" alt="Title of the page in a hand drawn 3D font saying 'Illustration, Design and other stuff' in between 'other' and 'stuff' three words switch on a loop the three words are 'cool', 'fun' and 'nice'">
+        <div class="sectionText">
+            <img class="icon" src="icons/svg/diagonal_line_right_black.svg">
+            <h2>branding</h2>
+            <p>
+                A selection of logos and branding created for international organisations and smaller clients.
+                <br><br>
+            </p>
+            <hr>
+        </div>
+        <div class="container" id="finep-Publication">
+            <p class="figureTitle1"><span class="boldText">United Nations Development Programme </span> <span class="long-dash"></span> Lao PDR</p>
+            <figure class="mobile-spanAll tablet-spanAll">
+                <div class="videoContainer">
+                    <img src="Images_Portfolio-Branding/ODSC Branding 2025.pdf" alt="">
+                </div>
+                <figcaption><span class="boldText">Logo and branding for the One Door Service Center project
+                </span><span class="long-dash"></span> for a 140-page Ace Doubles-style publication with two asymmetrical sections, read from opposite directions. Developed a cohesive layout system for content tailored to sustainability practitioners (Part 1) and educators (Part 2), including cover design.</figcaption>
+            </figure>
+        </div>
+        <hr>
+        <div class="container" id="Tuol-Sleng-Publication">
+            <p class="figureTitle1"><span class="boldText">Tuol Sleng </span><span class="long-dash"></span> Cambodia</p>
+            <figure class="mobile-spanAll tablet-spanAll">
+                <div class="videoContainer">
+                    <iframe allowfullscreen="allowfullscreen" allow="clipboard-write" scrolling="no" class="fp-iframe" src="https://heyzine.com/flip-book/2ffd730525.html" style="border: 0px; width: 100%; height: 600px;"></iframe>
+                </div>
+                <figcaption><span class="boldText">Design, layout and typesetting for Spanish version
+                </span><span class="long-dash"></span> for a 104-page modular training manual (Violent Past) focused on education and memory work. Established a clear visual hierarchy and navigation system using chapter tabs and recurring layout elements, enabling intuitive use without reliance on page numbers. Applied a very limited colour palette to ensure cost-effective production and maintain clarity even when photocopied. Prepared print-ready files and adapted the Spanish edition to align with the original design system.</figcaption>
+            </figure>
+        </div>
+        <hr>
+    </main>
+    <a href="#" class="nav-button nav-button--back-to-top">back to top</a>
+    <script src="main.js"></script>
+    <script src="video.js"></script>
+</body>
+</html>
