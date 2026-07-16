@@ -29,7 +29,12 @@ body {
     background-color: transparent;
     margin: 0;
 }
-
+a {
+    font-family: var(--font-main);
+    color: var(--main-blue);
+    text-decoration: none;
+    font-weight: bold;
+}
 hr {
     display: block;
     margin: 1rem 0;
