@@ -313,6 +313,7 @@ nav a.current {
     background-color: var(--main-blue);
     position: relative;
 }
+
 .nav-button--back:hover, .nav-button--CV:hover {
     box-shadow:
     -.3rem -.3rem 0 var(--color-white),
