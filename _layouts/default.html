@@ -62,7 +62,7 @@
             <div class="sectionText">
                 <img class="icon" src="/icons/svg/diagonal_line_left_black.svg" alt="">
                 <h2>{{ page.heading }}</h2>
-                {% if page.date %}<p>{{ page.date | date: "%-d %B %Y" }}</p>{% endif %}
+                {% if page.date %}<h2>{{ page.date | date: "%-d %B %Y" }}</h2>{% endif %}
                 <p>{{ page.intro }}</p>
                 <hr>
             </div>
@@ -71,6 +71,7 @@
             </div>
 
         <hr>
+
     </main>
     <a href="#" class="nav-button nav-button--back-to-top">back to top</a>
     <script src="/main.js">

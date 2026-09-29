@@ -369,17 +369,17 @@ button {
     height: 44px;
     line-height: 40px;
     text-align: center;
-    font-size: 28px;
+    font-size: 35px;
     text-decoration: none;
-    color: var(--main-black);
-    background: var(--accent-peach);
-    border-radius: 50%;
+    color: var(--accent-peach);
+    /* background: var(--accent-peach);
+    border-radius: 50%; */
     z-index: 2;
   }
   
-  .slides a:hover {
+  /* .slides a:hover {
     background: var(--main-blue);
-  }
+  } */
   
   .slides .prev {
     left: 12px;
@@ -387,6 +387,12 @@ button {
   
   .slides .next {
     right: 12px;
+  }
+  
+  .restart-target {
+    position: absolute;
+    top: 0;
+    left: 0;
   }
   
   .slides:has(.restart-target:target) {
