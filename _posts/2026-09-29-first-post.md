@@ -1,8 +1,8 @@
 ---
 layout: default
-title: "First post"
+title: "Test"
 heading: "blog"
-intro: "A short line about this post."
+intro: "Broken shelf needed some love"
 ---
 
 Finders keepers.
