@@ -331,6 +331,67 @@ button {
     background-color: currentColor;
     vertical-align: middle;
 }
+/* ----------------------------------- slideshow ----------------------------------------------- */
+.slideshow {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  
+  .slides {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+  }
+  
+  .slides::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .slides section {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+    position: relative;
+  }
+  
+  .slides img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  .slides a {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    line-height: 40px;
+    text-align: center;
+    font-size: 28px;
+    text-decoration: none;
+    color: var(--main-black);
+    background: var(--accent-peach);
+    border-radius: 50%;
+    z-index: 2;
+  }
+  
+  .slides a:hover {
+    background: var(--main-blue);
+  }
+  
+  .slides .prev {
+    left: 12px;
+  }
+  
+  .slides .next {
+    right: 12px;
+  }
+  
+  .slides:has(.restart-target:target) {
+    scroll-behavior: auto;
+  }
 
 /* ====================== tablet – min-width 500px =========================== */
 @media (min-width: 500px) {

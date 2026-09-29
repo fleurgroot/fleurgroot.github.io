@@ -1,222 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PDF Viewer</title>
-  <link rel="icon" type="image/png" href="icons/Favicon_Blue-Dot_Blue Dot.png">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: transparent;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      font-family: sans-serif;
-    }
-
-    #canvas-container {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-    }
-
-    canvas {
-      display: block;
-      max-width: 100%;
-      height: auto;
-    }
-
-    .controls {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px;
-      margin-top: 8px;
-    }
-
-    .btn {
-      background: #3554a1;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 7px 18px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      transition: background 0.15s;
-    }
-    .btn:hover { background: #243a75; }
-    .btn:disabled { background: #c0c8dc; cursor: default; }
-
-    .page-info {
-      font-size: 13px;
-      color: #555;
-    }
-
-    .zoom-group {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .zoom-btn {
-      background: #f0f2f8;
-      color: #3554a1;
-      border: 1.5px solid #c5cfe0;
-      border-radius: 5px;
-      width: 30px;
-      height: 30px;
-      font-size: 16px;
-      cursor: pointer;
-      font-weight: 700;
-      line-height: 1;
-      transition: background 0.15s;
-    }
-    .zoom-btn:hover { background: #dde3f5; }
-    .zoom-label { font-size: 12px; color: #888; min-width: 36px; text-align: center; }
-
-    #upload-prompt {
-      padding: 40px;
-      text-align: center;
-      color: #888;
-      font-size: 14px;
-    }
-    label.load-btn {
-      display: inline-block;
-      background: #3554a1;
-      color: white;
-      border-radius: 6px;
-      padding: 8px 20px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 12px;
-    }
-    #file-input { display: none; }
-  </style>
-</head>
-<body>
-
-<div id="upload-prompt">
-  <label class="load-btn" for="file-input">Open PDF</label><br>
-  <input type="file" id="file-input" accept=".pdf" />
-  or drag and drop a PDF anywhere on the page
-</div>
-
-<div id="canvas-container" style="display:none;">
-  <canvas id="pdf-canvas"></canvas>
-</div>
-
-<div class="controls" id="controls" style="display:none;">
-  <button class="btn" id="prev-btn">← Prev</button>
-  <span class="page-info"><span id="cur-page">1</span> / <span id="total-pages">—</span></span>
-  <button class="btn" id="next-btn">Next →</button>
-  <div class="zoom-group">
-    <button class="zoom-btn" id="zoom-out">−</button>
-    <span class="zoom-label" id="zoom-label">100%</span>
-    <button class="zoom-btn" id="zoom-in">+</button>
-  </div>
-</div>
-
-<script>
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-  let pdfDoc = null;
-  let currentPage = 1;
-  let scale = 1.4;
-  let rendering = false;
-
-  const canvas    = document.getElementById('pdf-canvas');
-  const ctx       = canvas.getContext('2d');
-  const curPageEl = document.getElementById('cur-page');
-  const totalEl   = document.getElementById('total-pages');
-  const zoomLabel = document.getElementById('zoom-label');
-  const prevBtn   = document.getElementById('prev-btn');
-  const nextBtn   = document.getElementById('next-btn');
-
-  async function renderPage(num) {
-    if (rendering) return;
-    rendering = true;
-    const page = await pdfDoc.getPage(num);
-    const vp = page.getViewport({ scale });
-    canvas.width  = vp.width;
-    canvas.height = vp.height;
-    await page.render({ canvasContext: ctx, viewport: vp }).promise;
-    rendering = false;
-    curPageEl.textContent = num;
-    prevBtn.disabled = num <= 1;
-    nextBtn.disabled = num >= pdfDoc.numPages;
-    zoomLabel.textContent = Math.round(scale * 100) + '%';
-  }
-
-  async function loadPDF(data) {
-    pdfDoc = await pdfjsLib.getDocument({ data }).promise;
-    totalEl.textContent = pdfDoc.numPages;
-    document.getElementById('upload-prompt').style.display = 'none';
-    document.getElementById('canvas-container').style.display = 'flex';
-    document.getElementById('controls').style.display = 'flex';
-    currentPage = 1;
-
-    // Auto-fit scale to container width
-    const page = await pdfDoc.getPage(1);
-    const vp = page.getViewport({ scale: 1 });
-    scale = Math.min((document.body.clientWidth - 40) / vp.width, 2.0);
-
-    renderPage(currentPage);
-  }
-
-  prevBtn.addEventListener('click', () => { if (currentPage > 1) renderPage(--currentPage); });
-  nextBtn.addEventListener('click', () => { if (currentPage < pdfDoc.numPages) renderPage(++currentPage); });
-
-  document.getElementById('zoom-in').addEventListener('click', () => {
-    scale = Math.min(scale + 0.2, 3.0);
-    renderPage(currentPage);
-  });
-  document.getElementById('zoom-out').addEventListener('click', () => {
-    scale = Math.max(scale - 0.2, 0.4);
-    renderPage(currentPage);
-  });
-
-  document.addEventListener('keydown', e => {
-    if (!pdfDoc) return;
-    if (e.key === 'ArrowRight') nextBtn.click();
-    if (e.key === 'ArrowLeft')  prevBtn.click();
-  });
-
-  document.getElementById('file-input').addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => loadPDF(new Uint8Array(ev.target.result));
-    reader.readAsArrayBuffer(file);
-  });
-
-  document.body.addEventListener('dragover', e => e.preventDefault());
-  document.body.addEventListener('drop', e => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file?.type === 'application/pdf') {
-      const reader = new FileReader();
-      reader.onload = ev => loadPDF(new Uint8Array(ev.target.result));
-      reader.readAsArrayBuffer(file);
-    }
-  });
-</script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>branding</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,200..800;1,200..800&family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/illustrations_in_videos.css">
     <link rel="stylesheet" href="css/global.css">
 </head>
 <body>
@@ -277,31 +67,339 @@
             </p>
             <hr>
         </div>
-        <div class="container" id="finep-Publication">
-            <p class="figureTitle1"><span class="boldText">United Nations Development Programme </span> <span class="long-dash"></span> Lao PDR</p>
+        <div class="container" id="LEAP_Branding_Guidelines">
+            <p class="figureTitle1"><span class="boldText">United Nations Development Programme – Governance Unit </span> - Lao PDR <span class="long-dash"></span> Branding Package and Visual Identity for the LEAP Project</p>
             <figure class="mobile-spanAll tablet-spanAll">
-                <div class="videoContainer">
-                    <img src="Images_Portfolio-Branding/ODSC Branding 2025.pdf" alt="">
+              <div class="slideshow">
+                <div class="slides">
+                  <section id="s1">
+                    <span id="restart"></span>
+                    <img src="Images_Portfolio-Branding/Slides/ODSC Branding 2025_Page_01.jpg" alt="ODSC Branding 2025, page 1">
+                    <a class="prev" href="#s3" aria-label="Previous">‹</a>
+                    <a class="next" href="#s2" aria-label="Next">›</a>
+                  </section>
+                  <section id="s2">
+                    <img src="Images_Portfolio-Branding/Slides/ODSC Branding 2025_Page_02.jpg" alt="ODSC Branding 2025, page 2">
+                    <a class="prev" href="#s1" aria-label="Previous">‹</a>
+                    <a class="next" href="#s3" aria-label="Next">›</a>
+                  </section>
+                  <section id="s3">
+                    <img src="Images_Portfolio-Branding/Slides/ODSC Branding 2025_Page_03.jpg" alt="ODSC Branding 2025, page 3">
+                    <a class="prev" href="#s2" aria-label="Previous">‹</a>
+                    <a class="next" href="#s4" aria-label="Next">›</a>
+                  </section>
+                  <section id="s4">
+                    <img src="Images_Portfolio-Branding/Slides/ODSC Branding 2025_Page_04.jpg" alt="ODSC Branding 2025, page 4">
+                    <a class="prev" href="#s3" aria-label="Previous">‹</a>
+                    <a class="next" href="#s5" aria-label="Next">›</a>
+                  </section>
+                  <section id="s5">
+                    <img src="Images_Portfolio-Branding/Slides/ODSC Branding 2025_Page_05.jpg" alt="ODSC Branding 2025, page 5">
+                    <a class="prev" href="#s4" aria-label="Previous">‹</a>
+                    <a class="next" href="#s6" aria-label="Next">›</a>
+                  </section>
+                  <section id="s6">
+                    <img src="Images_Portfolio-Branding/Slides/ODSC Branding 2025_Page_06.jpg" alt="ODSC Branding 2025, page 6">
+                    <a class="prev" href="#s5" aria-label="Previous">‹</a>
+                    <a class="next" href="#s7" aria-label="Next">›</a>
+                  </section>
+                  <section id="s7">
+                    <img src="Images_Portfolio-Branding/Slides/ODSC Branding 2025_Page_07.jpg" alt="ODSC Branding 2025, page 7">
+                    <a class="prev" href="#s6" aria-label="Previous">‹</a>
+                    <a class="next" href="#s8" aria-label="Next">›</a>
+                  </section>
+                  <section id="s8">
+                    <img src="Images_Portfolio-Branding/Slides/ODSC Branding 2025_Page_08.jpg" alt="ODSC Branding 2025, page 8">
+                    <a class="prev" href="#s7" aria-label="Previous">‹</a>
+                    <a class="next" href="#s9" aria-label="Next">›</a>
+                  </section>
+                  <section id="s9">
+                    <img src="Images_Portfolio-Branding/Slides/ODSC Branding 2025_Page_09.jpg" alt="ODSC Branding 2025, page 9">
+                    <a class="prev" href="#s8" aria-label="Previous">‹</a>
+                    <a class="next" href="#s10" aria-label="Next">›</a>
+                  </section>
+                  <section id="s10">
+                    <img src="Images_Portfolio-Branding/Slides/ODSC Branding 2025_Page_10.jpg" alt="ODSC Branding 2025, page 10">
+                    <a class="prev" href="#s9" aria-label="Previous">‹</a>
+                    <a class="next" href="#s11" aria-label="Next">›</a>
+                  </section>
+                  <section id="s11">
+                    <img src="Images_Portfolio-Branding/Slides/ODSC Branding 2025_Page_11.jpg" alt="ODSC Branding 2025, page 11">
+                    <a class="prev" href="#s10" aria-label="Previous">‹</a>
+                    <a class="next" href="#s12" aria-label="Next">›</a>
+                  </section>
+                  <section id="s12">
+                    <img src="Images_Portfolio-Branding/Slides/ODSC Branding 2025_Page_12.jpg" alt="ODSC Branding 2025, page 12">
+                    <a class="prev" href="#s11" aria-label="Previous">‹</a>
+                    <a class="next" href="#s13" aria-label="Next">›</a>
+                  </section>
+                  <section id="s13">
+                    <img src="Images_Portfolio-Branding/Slides/ODSC Branding 2025_Page_13.jpg" alt="ODSC Branding 2025, page 13">
+                    <a class="prev" href="#s12" aria-label="Previous">‹</a>
+                    <a class="next" href="#s14" aria-label="Next">›</a>
+                  </section>
+                  <section id="s14">
+                    <img src="Images_Portfolio-Branding/Slides/ODSC Branding 2025_Page_14.jpg" alt="ODSC Branding 2025, page 14">
+                    <a class="prev" href="#s13" aria-label="Previous">‹</a>
+                    <a class="next" href="#s15" aria-label="Next">›</a>
+                  </section>
+                  <section id="s15">
+                    <img src="Images_Portfolio-Branding/Slides/ODSC Branding 2025_Page_15.jpg" alt="ODSC Branding 2025, page 15">
+                    <a class="prev" href="#s14" aria-label="Previous">‹</a>
+                    <a class="next" href="#s16" aria-label="Next">›</a>
+                  </section>
+                  <section id="s16">
+                    <img src="Images_Portfolio-Branding/Slides/ODSC Branding 2025_Page_16.jpg" alt="ODSC Branding 2025, page 16">
+                    <a class="prev" href="#s15" aria-label="Previous">‹</a>
+                    <a class="next" href="#s17" aria-label="Next">›</a>
+                  </section>
+                  <section id="s17">
+                    <img src="Images_Portfolio-Branding/Slides/ODSC Branding 2025_Page_17.jpg" alt="ODSC Branding 2025, page 17">
+                    <a class="prev" href="#s16" aria-label="Previous">‹</a>
+                    <a class="next" href="#s18" aria-label="Next">›</a>
+                  </section>
+                  <section id="s18">
+                    <img src="Images_Portfolio-Branding/Slides/ODSC Branding 2025_Page_18.jpg" alt="ODSC Branding 2025, page 18">
+                    <a class="prev" href="#s17" aria-label="Previous">‹</a>
+                    <a class="next" href="#s19" aria-label="Next">›</a>
+                  </section>
+                  <section id="s19">
+                    <img src="Images_Portfolio-Branding/Slides/ODSC Branding 2025_Page_19.jpg" alt="ODSC Branding 2025, page 19">
+                    <a class="prev" href="#s18" aria-label="Previous">‹</a>
+                    <a class="next" href="#s20" aria-label="Next">›</a>
+                  </section>
+                  <section id="s20">
+                    <img src="Images_Portfolio-Branding/Slides/ODSC Branding 2025_Page_20.jpg" alt="ODSC Branding 2025, page 20">
+                    <a class="prev" href="#s19" aria-label="Previous">‹</a>
+                    <a class="next" href="#s21" aria-label="Next">›</a>
+                  </section>
+                  <section id="s21">
+                    <img src="Images_Portfolio-Branding/Slides/ODSC Branding 2025_Page_21.jpg" alt="ODSC Branding 2025, page 21">
+                    <a class="prev" href="#s20" aria-label="Previous">‹</a>
+                    <a class="next" href="#restart" aria-label="Back to start">›</a>
+                  </section>
                 </div>
-                <figcaption><span class="boldText">Logo and branding for the One Door Service Center project
-                </span><span class="long-dash"></span> for a 140-page Ace Doubles-style publication with two asymmetrical sections, read from opposite directions. Developed a cohesive layout system for content tailored to sustainability practitioners (Part 1) and educators (Part 2), including cover design.</figcaption>
+                <figcaption><span class="boldText">Branding Guidelines for the One Door Service Center visual identity
+                </span><span class="long-dash"></span> Developed a citizen-centric, inclusive design reflecting values of digital transformation and governance.</figcaption>
+              </div>
             </figure>
+            <figure class="mobile-spanHalf tablet-spanThree">
+                <img src="Images_Portfolio-Branding/Examples of logos in use/ODSC ex1.jpg" alt="Facebook post of person to the left with a white outline around them and a quote in Lao.">
+            </figure>
+            <figure class="mobile-spanHalf tablet-spanThree">
+                <img src="Images_Portfolio-Branding/Examples of logos in use/ODSC ex2.jpg" alt="Facebook post of person to the right with a white outline around them and a quote in English.">
+            </figure>
+            <figure class="mobile-spanAll tablet-spanHalf">
+                <img src="Images_Portfolio-Branding/Examples of logos in use/ODSC ex11.jpg" alt="Cover illustration showing less people on the left side thinking about how to engage in sustainable practices, while more people on the right side are actively participating in some actions. One person is depicted mid-jump, with the help of a do-er">
+            </figure>
+            <figure class="mobile-spanAll tablet-spanThree">
+                <img src="Images_Portfolio-Branding/Examples of logos in use/ODSC ex5.jpg" alt="Cover illustration showing less people on the left side thinking about how to engage in sustainable practices, while more people on the right side are actively participating in some actions. One person is depicted mid-jump, with the help of a do-er">
+            </figure>
+            <figure class="mobile-spanAll tablet-spanHalf">
+                <img src="Images_Portfolio-Branding/Examples of logos in use/ODSC ex6.jpg" alt="Cover illustration showing less people on the left side thinking about how to engage in sustainable practices, while more people on the right side are actively participating in some actions. One person is depicted mid-jump, with the help of a do-er">
+            </figure>
+            <figure class="mobile-spanAll tablet-spanThree">
+                <img src="Images_Portfolio-Branding/Examples of logos in use/ODSC ex7.jpg" alt="Cover illustration showing less people on the left side thinking about how to engage in sustainable practices, while more people on the right side are actively participating in some actions. One person is depicted mid-jump, with the help of a do-er">
+            </figure>
+            <figcaption class="mobile-spanAll tablet-spanAll"><span class="boldText">Identity in use </span><span class="long-dash"></span> posts created independently by the ODSC comms team, using the visual identity I designed. <br><br>
+                <span class="boldText">>> View ODSC facebook page
+            </span><span class="long-dash"></span> <a href="https://www.facebook.com/odsc.laopdr" target="_blank" rel="noopener noreferrer"> here</a></figcaption>
         </div>
         <hr>
-        <div class="container" id="Tuol-Sleng-Publication">
-            <p class="figureTitle1"><span class="boldText">Tuol Sleng </span><span class="long-dash"></span> Cambodia</p>
+        <div class="container" id="FARM_Calendar">
+            <p class="figureTitle1"><span class="boldText">United Nations Development Programme – Environment Unit </span> - Lao PDR   <span class="long-dash"></span> FARM Project</p>
             <figure class="mobile-spanAll tablet-spanAll">
-                <div class="videoContainer">
-                    <iframe allowfullscreen="allowfullscreen" allow="clipboard-write" scrolling="no" class="fp-iframe" src="https://heyzine.com/flip-book/2ffd730525.html" style="border: 0px; width: 100%; height: 600px;"></iframe>
-                </div>
-                <figcaption><span class="boldText">Design, layout and typesetting for Spanish version
-                </span><span class="long-dash"></span> for a 104-page modular training manual (Violent Past) focused on education and memory work. Established a clear visual hierarchy and navigation system using chapter tabs and recurring layout elements, enabling intuitive use without reliance on page numbers. Applied a very limited colour palette to ensure cost-effective production and maintain clarity even when photocopied. Prepared print-ready files and adapted the Spanish edition to align with the original design system.</figcaption>
+                <div class="slideshow">
+                    <div class="slides">
+                      <section id="cal-cover">
+                        <span id="cal-restart" class="restart-target"></span>
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/1_Cover.png" alt="Calendar cover">
+                        <a class="prev" href="#cal-dec-dates" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-jan-main" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-jan-main">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/1_January Photo page.png" alt="January branding artwork">
+                        <a class="prev" href="#cal-cover" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-jan-dates" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-jan-dates">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/1a_Date page January.png" alt="January calendar dates">
+                        <a class="prev" href="#cal-jan-main" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-feb-main" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-feb-main">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/2_February.png" alt="February branding artwork">
+                        <a class="prev" href="#cal-jan-dates" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-feb-dates" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-feb-dates">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/2a_Date page February.png" alt="February calendar dates">
+                        <a class="prev" href="#cal-feb-main" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-mar-main" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-mar-main">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/3a_March.png" alt="March branding artwork">
+                        <a class="prev" href="#cal-feb-dates" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-mar-dates" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-mar-dates">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/3_Date page March.png" alt="March calendar dates">
+                        <a class="prev" href="#cal-mar-main" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-apr-main" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-apr-main">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/4_April.png" alt="April branding artwork">
+                        <a class="prev" href="#cal-mar-dates" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-apr-dates" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-apr-dates">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/4a_Date page April.png" alt="April calendar dates">
+                        <a class="prev" href="#cal-apr-main" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-may-main" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-may-main">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/5a_May.png" alt="May branding artwork">
+                        <a class="prev" href="#cal-apr-dates" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-may-dates" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-may-dates">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/5_Date page May.png" alt="May calendar dates">
+                        <a class="prev" href="#cal-may-main" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-jun-main" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-jun-main">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/6_June.png" alt="June branding artwork">
+                        <a class="prev" href="#cal-may-dates" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-jun-dates" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-jun-dates">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/6a_Date page June.png" alt="June calendar dates">
+                        <a class="prev" href="#cal-jun-main" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-jul-main" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-jul-main">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/7_July.png" alt="July branding artwork">
+                        <a class="prev" href="#cal-jun-dates" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-jul-dates" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-jul-dates">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/7a_Date page July.png" alt="July calendar dates">
+                        <a class="prev" href="#cal-jul-main" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-aug-main" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-aug-main">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/8_August.png" alt="August branding artwork">
+                        <a class="prev" href="#cal-jul-dates" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-aug-dates" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-aug-dates">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/8a_Date page August.png" alt="August calendar dates">
+                        <a class="prev" href="#cal-aug-main" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-sep-main" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-sep-main">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/9_September.png" alt="September branding artwork">
+                        <a class="prev" href="#cal-aug-dates" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-sep-dates" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-sep-dates">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/9a_Date page September.png" alt="September calendar dates">
+                        <a class="prev" href="#cal-sep-main" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-oct-main" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-oct-main">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/10_October.png" alt="October branding artwork">
+                        <a class="prev" href="#cal-sep-dates" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-oct-dates" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-oct-dates">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/10_Date page October.png" alt="October calendar dates">
+                        <a class="prev" href="#cal-oct-main" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-nov-main" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-nov-main">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/11_November.png" alt="November branding artwork">
+                        <a class="prev" href="#cal-oct-dates" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-nov-dates" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-nov-dates">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/11a_Date page November.png" alt="November calendar dates">
+                        <a class="prev" href="#cal-nov-main" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-dec-main" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-dec-main">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/December.png" alt="December branding artwork">
+                        <a class="prev" href="#cal-nov-dates" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-dec-dates" aria-label="Next">›</a>
+                      </section>
+                  
+                      <section id="cal-dec-dates">
+                        <img src="Images_Portfolio-Branding/FARM Visibility Calendar Long/12a_Date page December.png" alt="December calendar dates">
+                        <a class="prev" href="#cal-dec-main" aria-label="Previous">‹</a>
+                        <a class="next" href="#cal-restart" aria-label="Back to start">›</a>
+                      </section>
+                  
+                    </div>
+                  </div>
+                <figcaption><span class="boldText">Design of visibility items – Calendar
+                </span><span class="long-dash"></span> for the Financing Agrochemicals Reduction and Management (FARM) in Lao PDR Project </figcaption>
             </figure>
+            <figure class="mobile-spanAll tablet-spanHalf">
+                <img src="Images_Portfolio-Branding/FARM Vis_Items-01.jpg" alt="White t-shirt with the slogan 'Growing Green, Living Clean', and a close-up of the design showing an icon with the slogan in English and Lao.">
+            </figure>
+            <figure class="mobile-spanAll tablet-spanHalf">
+                <img src="Images_Portfolio-Branding/FARM Vis_Items-02.jpg" alt="White t-shirt with the slogan 'Growing Green, Living Clean', and a close-up of the design showing an icon with the slogan in English and Lao.">
+            </figure>
+            <figure class="mobile-spanAll tablet-spanHalf">
+                <img src="Images_Portfolio-Branding/FARM Vis_Items-03.jpg" alt="White t-shirt with the slogan 'Growing Green, Living Clean', and a close-up of the design showing an icon with the slogan in English and Lao.">
+            </figure>
+            <figure class="mobile-spanAll tablet-spanHalf">
+                <img src="Images_Portfolio-Branding/FARM Vis_Items-04.jpg" alt="White t-shirt with the slogan 'Growing Green, Living Clean', and a close-up of the design showing an icon with the slogan in English and Lao.">
+            </figure>
+            <figcaption class="mobile-spanAll tablet-spanAll"><span class="boldText">Design of visibility items – T-shirt
+            </span><span class="long-dash"></span> for the Financing Agrochemicals Reduction and Management (FARM) in Lao PDR Project </figcaption>
         </div>
         <hr>
+        <div class="container" id="ROK_Mekong">
+            <p class="figureTitle1"><span class="boldText">United Nations Development Programme – Environment Unit </span> - Lao PDR   <span class="long-dash"></span> ROK Mekong Project</p>
+            
+            <figure class="mobile-spanAll tablet-spanFour">
+                <img src="Images_Portfolio-Branding/Rox_ex2.jpg" alt="Cover illustration showing less people on the left side thinking about how to engage in sustainable practices, while more people on the right side are actively participating in some actions. One person is depicted mid-jump, with the help of a do-er">
+            </figure>
+            <figure class="mobile-spanAll tablet-spanFour">
+              <img src="Images_Portfolio-Branding/ROK-Mekong_Logo.jpg" alt="Cover illustration showing less people on the left side thinking about how to engage in sustainable practices, while more people on the right side are actively participating in some actions. One person is depicted mid-jump, with the help of a do-er">
+            </figure>
+            <figure class="mobile-spanAll tablet-spanFour">
+                <img src="Images_Portfolio-Branding/Rok_ex1.jpg" alt="Cover illustration showing less people on the left side thinking about how to engage in sustainable practices, while more people on the right side are actively participating in some actions. One person is depicted mid-jump, with the help of a do-er">
+            </figure>
+            <figcaption class="mobile-spanAll tablet-spanAll"><span class="boldText">Design of project branding
+            </span><span class="long-dash"></span> for the ROK Mekong project – Enhancing Integrated Water Management and Climate Resilience in Vulnerable Urban Areas of the Mekong River Basin. Branding is used on bags, drink bottles, and clothing such as polo shirts, jackets and vests</figcaption>
+        </div>
     </main>
     <a href="#" class="nav-button nav-button--back-to-top">back to top</a>
     <script src="main.js"></script>
-    <script src="video.js"></script>
 </body>
 </html>
