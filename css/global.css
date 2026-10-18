@@ -22,6 +22,11 @@ html {
 .left, .right {
     display: none;
 }
+::selection {
+  background: var(--main-blue); 
+  color: var(--accent-peach); 
+}
+
 body {
     font-family: var(--font-main);
     color: var(--main-black);
@@ -492,7 +497,10 @@ button {
     grid-column: span 10;
     height: 40px;
     }
-
+    
+    .name-link {
+        display: contents;
+    }
     hr {
         grid-column: 3 / -1;
     }
