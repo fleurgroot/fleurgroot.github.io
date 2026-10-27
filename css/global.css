@@ -54,10 +54,12 @@ figcaption {
     padding-top: .35rem;
     padding-bottom: .3rem;
 }
+
 figcaption > .boldText, figcaption > a {
     font-size: .8rem;
     text-decoration: none;
 }
+
 h2, .boldText {
     font-size: var(--font-size-base);
     font-weight: 600;
@@ -65,24 +67,30 @@ h2, .boldText {
     line-height: 1.2rem;
     margin-top: 0.5rem;
 }
+
 p {
     font-weight: 300;
     font-size: .9rem;
     line-height: 1.25rem;
     margin-bottom: 0;
 }
+
 .boldTextP {
     font-weight: 600;
 }
+
 .sectionText, p, hr, p.figureTitle, .mobile-spanAll {
     grid-column: span 2;
 }
+
 .mobile-spanHalf {
     grid-column: span 1;
 }
+
 .mobile-hide {
     display: none;
 }
+
 .sectionText {
     padding-top: 3.3rem;
 }
@@ -94,8 +102,6 @@ main {
     max-width: 1200px;
     margin: auto;
     padding: 1rem;
-    /* outline: 2px solid red; */
-
 }
 
 .grid {
@@ -116,7 +122,9 @@ img {
     gap: var(--gap-sml);
     align-items: start;
 }
+
 /* ===================================== Nav base styles ==================================== */
+
 nav {
     font-size: var(--font-size-large);
     font-weight: 700;
@@ -182,6 +190,7 @@ nav a.current {
   white-space: nowrap; /* prevents line breaks if the nav gets tight */
   text-align: center;
 }
+
 #rotating-word {
   display: inline-block;      /* allows consistent spacing for the word */
   width: 4ch;                 /* reserve space for the longest word */
@@ -382,16 +391,18 @@ button {
     z-index: 2;
   }
   
-  /* .slides a:hover {
+  .slides a:hover {
     background: var(--main-blue);
-  } */
+    border-radius: 2rem;
+
+  }
   
   .slides .prev {
-    left: 12px;
+    left: 1rem;
   }
   
   .slides .next {
-    right: 12px;
+    right: 1rem;
   }
   
   .restart-target {
